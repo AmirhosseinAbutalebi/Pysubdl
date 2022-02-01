@@ -59,7 +59,7 @@ class Ui_WizardPage(object):
 
         self.comboBoxForLanguage = QtWidgets.QComboBox(WizardPage)
         self.comboBoxForLanguage.setGeometry(QtCore.QRect(30, 150, 111, 22))
-        self.comboBoxForLanguage.setEditable(True)
+        self.comboBoxForLanguage.setEditable(False)
         self.comboBoxForLanguage.setObjectName("comboBoxForLanguage")
         self.comboBoxForLanguage.addItem("")
         self.comboBoxForLanguage.addItem("")
@@ -67,7 +67,7 @@ class Ui_WizardPage(object):
 
         self.comboBoxForFormat = QtWidgets.QComboBox(WizardPage)
         self.comboBoxForFormat.setGeometry(QtCore.QRect(30, 220, 111, 22))
-        self.comboBoxForFormat.setEditable(True)
+        self.comboBoxForFormat.setEditable(False)
         self.comboBoxForFormat.setObjectName("comboBoxForFormat")
         self.comboBoxForFormat.addItem("")
         self.comboBoxForFormat.addItem("")
