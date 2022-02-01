@@ -8,9 +8,7 @@ import shutil
 from zipfile import ZipFile
 import platform
 
-def osName():
-    osName = platform.system()
-    return osName
+osName = platform.system()
 
 webSiteUrl = "https://subf2m.co"
 
@@ -103,7 +101,7 @@ for page in subtitleUrl:
     linkDownload.append(webSiteUrl + getInfoPage.find("a", {"class": "button positive"}).get("href"))
 
 
-if osName() == "Windows":
+if osName == "Windows":
 
     count = 1
     for link in linkDownload:

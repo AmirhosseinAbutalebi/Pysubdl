@@ -337,7 +337,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Windows</string>
+    <string/>
    </property>
    <property name="textFormat">
     <enum>Qt::PlainText</enum>
