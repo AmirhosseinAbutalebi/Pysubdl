@@ -8,15 +8,16 @@ import shutil
 from zipfile import ZipFile
 import platform
 
-osName = platform.system()
+def osName():
+    osName = platform.system()
+    return osName
 
 webSiteUrl = "https://subf2m.co"
 
 language = {
-    "persian": "farsi_persian",
-    "english": "english",
-    "arabic": "arabic",
-    "dutch": "dutch",
+    "Persian": "farsi_persian",
+    "English": "english",
+    "Arabic": "arabic",
 }
 
 formatMovie = {
@@ -44,7 +45,7 @@ resolution = {
     "2160": "2160",
 }
 
-getlanguage = "persian"
+getlanguage = "Persian"
 getNameMovie = "deadpool"
 getFormat = "720"
 getResolotion = "BluRay"
@@ -81,11 +82,12 @@ for check in nameCheckMovie:
         exit(0)
 
 
-searchMovieUrl = webSiteUrl + \
-    searchName.find("a").get("href") + "/" + language[getlanguage]
+searchMovieUrl = webSiteUrl + searchName.find("a").get("href") + "/" + language[getlanguage]
 
 getPage = requests.get(searchMovieUrl)
 getInfoPage = BeautifulSoup(getPage.content, "html5lib")
+
+posterUrl = getInfoPage.find("div", {"class": "poster"}).find("img").get("src")
 
 subtitleUrl = []
 for item in getInfoPage.find_all("li", {"class": "item"}):
@@ -98,11 +100,10 @@ linkDownload = []
 for page in subtitleUrl:
     getPage = requests.get(page)
     getInfoPage = BeautifulSoup(getPage.content, "html5lib")
-    linkDownload.append(webSiteUrl + getInfoPage.find("a",
-                                                      {"class": "button positive"}).get("href"))
+    linkDownload.append(webSiteUrl + getInfoPage.find("a", {"class": "button positive"}).get("href"))
 
 
-if osName == "Windows":
+if osName() == "Windows":
 
     count = 1
     for link in linkDownload:
@@ -113,7 +114,6 @@ if osName == "Windows":
             for chunk in req.iter_content(chunk_size=8192):
                 if chunk:
                     f.write(chunk)
-
 
     filesToMove = []
     for i in range(len(linkDownload)):
