@@ -12,11 +12,54 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer,QDateTime, Qt
-import time, sys, requests
+from bs4 import BeautifulSoup
+from zipfile import ZipFile
+import time, sys, requests, os, platform, shutil
+
+
+webSiteUrl = "https://subf2m.co"
+
+language = {
+    "Persian": "farsi_persian",
+    "English": "english",
+    "Arabic": "arabic"
+}
+
+formatMovie = {
+    "WEB-DL": "WEB-DL",
+    "WEBRip": "WEBRip",
+    "HDTV": "HDTV",
+    "HDRip": "HDRip",
+    "HC-Cam": "HC-Cam",
+    "HDTC": "HDTC",
+    "HC.CAMRip": "HC.CAMRip",
+    "HC.HDTS": "HC.HDTS",
+    "HD-TC": "HD-TC",
+    "BluRay": "BluRay",
+    "UHD.BluRay": "UHD.BluRay",
+    "BRRip": "BRRip",
+    "BDRip": "BDRip",
+    "Full.HD": "Full.HD",
+    "HDCam": "HDCam"
+}
+
+resolution = {
+    "720": "720",
+    "480": "480",
+    "1080": "1080",
+    "2160": "2160"
+}
+
 
 
 
 class Ui_WizardPage(object):
+
+    searchUrl = ""
+    currentpath = ""
+    path = ""
+    pathwin =  ""
+
     def setupUi(self, WizardPage):
         WizardPage.setObjectName("WizardPage")
         WizardPage.resize(520, 441)
@@ -218,15 +261,44 @@ class Ui_WizardPage(object):
         self.radioButton1080.setText(_translate("WizardPage", "1080"))
         self.radioButton2160.setText(_translate("WizardPage", "2160"))
         self.labelOfOsName.setText(_translate("WizardPage", "OS System :"))
-        self.labelOsNameShow.setText(_translate("WizardPage", "Windows"))
+        self.labelOsNameShow.setText(_translate("WizardPage", self.showOs()))
         self.labelForPath.setText(_translate("WizardPage", "Path for Download :"))
         self.ChangePathbutton.setText(_translate("WizardPage", "Change"))
         self.submitNameMovie.setText(_translate("WizardPage", "Submit"))
 
+    def setResolotion(self):
+        resolotionSelected = ""
+        if self.radioButton480.isChecked():
+            resolotionSelected = self.radioButton480.text()
+        elif self.radioButton720.isChecked():
+            resolotionSelected = self.radioButton720.text()
+        elif self.radioButton1080.isChecked():
+            resolotionSelected = self.radioButton1080.text()
+        elif self.radioButton2160.isChecked():
+            resolotionSelected = self.radioButton2160.text()
+        return resolotionSelected
+
+    def setFormat(self):
+        formatSelected = self.comboBoxForFormat.currentText()
+        return formatSelected
+
+    def setLanguage(self):
+        languageSelected = self.comboBoxForLanguage.currentText()
+        return languageSelected
+
+    def setNameMovie(self):
+        movie = self.GetNameMovie.toPlainText()
+        return movie
+
+    def showOs(self):
+        osName = platform.system()
+        return osName
+
     def useDialog(self):
-        path = QFileDialog.getExistingDirectory()
-        if path:
-            self.textEdit.setText(path)
+        self.currentpath = QFileDialog.getExistingDirectory()
+        self.pathwin = self.currentpath.replace("/", "\\")
+        if self.currentpath:
+            self.textEdit.setText(self.pathwin)
 
     def showTime(self):
         time = QDateTime.currentDateTime()
@@ -234,7 +306,6 @@ class Ui_WizardPage(object):
         self.labelShowTime.setText(timeDisplay)
 
     def clickSubmitNameMovie(self):
-
         nameMovie = self.GetNameMovie.toPlainText()
         if nameMovie == "":
             self.noneNameMovie()
@@ -253,10 +324,11 @@ class Ui_WizardPage(object):
         for i in range(maxProgressBar):
             time.sleep(0.02)
             self.progressBarOfPoster.setValue(i + 1)
-            if i == maxProgressBar:
+            if i == maxProgressBar-5:
                 self.showPoster()
 
     def showPoster(self):
+        posterUrl, self.searchUrl = self.processFindPoster()
         image = QImage()
         image.loadFromData(requests.get(posterUrl).content)
 
@@ -266,16 +338,111 @@ class Ui_WizardPage(object):
     def closeWindow(self):
         exit(0)
 
+    def createFolder(self):
+        self.path = os.path.join(self.pathwin, self.setNameMovie().capitalize())
+        try:
+            if os.path.exists(self.setNameMovie().capitalize()):
+                msg = QMessageBox()
+                msg.setWindowTitle("PySubDl")
+                msg.setText("Folder with name movie has exist.please remove it or change directory.")
+                msg.setIcon(QMessageBox.Information)
+                msg.setStandardButtons(QMessageBox.Ok)
+            else:
+                os.makedirs(self.path, exist_ok=True)
+
+        except OSError as error:
+            print("Directory '%s' can not be created" % getNameMovie.capitalize())
+
+    def processFindPoster(self):
+        getNameMovie = self.setNameMovie()
+        getlanguage = self.setLanguage()
+        getNameMovie = getNameMovie.replace(" ", "+")
+        getNameMovie = getNameMovie.lower()
+
+        searchUrl = webSiteUrl + "/subtitles/searchbytitle?query=" + getNameMovie + "&l="
+
+        getPage = requests.get(searchUrl)
+        getInfoPage = BeautifulSoup(getPage.content, "html5lib")
+
+        searchName = getInfoPage.find("div", {"class": "title"})
+        nameMovieFound = searchName.get_text()
+
+        nameMovieFound = nameMovieFound.lower()
+        nameCheckMovie = getNameMovie.split()
+
+        for check in nameCheckMovie:
+            if check not in nameMovieFound:
+                msg = QMessageBox()
+                msg.setWindowTitle("PySubDl")
+                msg.setText("Movie not found")
+                msg.setIcon(QMessageBox.Information)
+                msg.setStandardButtons(QMessageBox.Ok)
+                continue
+
+        searchMovieUrl = webSiteUrl + searchName.find("a").get("href") + "/" + language[getlanguage]
+
+        getPage = requests.get(searchMovieUrl)
+        getInfoPage = BeautifulSoup(getPage.content, "html5lib")
+
+        posterUrl = getInfoPage.find("div", {"class": "poster"}).find("img").get("src")
+
+        return posterUrl, searchMovieUrl
+
+    def processFindsub(self,searchMovieUrl):
+        getFormat = self.setFormat()
+        getResolotion = self.setResolotion()
+        getPage = requests.get(searchMovieUrl)
+        getInfoPage = BeautifulSoup(getPage.content, "html5lib")
+        subtitleUrl = []
+        for item in getInfoPage.find_all("li", {"class": "item"}):
+            for list in item.find_all("ul", {"class": "scrolllist"}):
+                if getFormat in list.text and getResolotion in list.text:
+                    subtitleUrl.append(
+                        webSiteUrl + item.find("a", {"class": "download icon-download"}).get("href"))
+
+        linkDownload = []
+        for page in subtitleUrl:
+            getPage = requests.get(page)
+            getInfoPage = BeautifulSoup(getPage.content, "html5lib")
+            linkDownload.append(webSiteUrl + getInfoPage.find("a", {"class": "button positive"}).get("href"))
+
+        return linkDownload
+
+
+
+    def getSub(self, os, linkDownload):
+        if os == "Windows":
+            count = 1
+            for link in linkDownload:
+                filename = self.setNameMovie() + str(count) + ".zip"
+                count += 1
+                req = requests.get(link)
+                with open(filename, "wb") as f:
+                    for chunk in req.iter_content(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+
+            filesToMove = []
+            for i in range(len(linkDownload)):
+                filesToMove.append(self.setNameMovie() + str(i + 1) + ".zip")
+
+            for file in filesToMove:
+                source =  self.pathwin + "\\" + file
+                destination = self.path + "\\" + file
+                shutil.move(source, destination)
+
+            for file in filesToMove:
+                with ZipFile(self.path + "\\" + file, 'r') as zip:
+                    zip.extractall(self.path)
+
+            for file in filesToMove:
+                os.remove(self.path + "\\" + file)
+
     def clickStartbtn(self):
 
-        if self.radioButton480.isChecked():
-            print(self.radioButton480.text())
-        elif self.radioButton720.isChecked():
-            print(self.radioButton720.text())
-        elif self.radioButton1080.isChecked():
-            print(self.radioButton1080.text())
-        elif self.radioButton2160.isChecked():
-            print(self.radioButton2160.text())
+        self.createFolder()
+        link = self.processFindsub(self.searchUrl)
+        self.getSub(self.showOs(), link)
 
         msg = QMessageBox()
         msg.setWindowTitle("PySubDl")
