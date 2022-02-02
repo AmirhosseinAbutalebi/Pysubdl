@@ -14,7 +14,7 @@ from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer,QDateTime, Qt
 from bs4 import BeautifulSoup
 from zipfile import ZipFile
-import time, sys, requests, os, platform, shutil
+import time, sys, requests, os, platform
 
 
 webSiteUrl = "https://subf2m.co"
@@ -59,6 +59,8 @@ class Ui_WizardPage(object):
     currentpath = ""
     path = ""
     pathwin =  ""
+    pathProgram = os.getcwd()
+    checkSubmitButton = False
 
     def setupUi(self, WizardPage):
         WizardPage.setObjectName("WizardPage")
@@ -295,10 +297,14 @@ class Ui_WizardPage(object):
         return osName
 
     def useDialog(self):
-        self.currentpath = QFileDialog.getExistingDirectory()
-        self.pathwin = self.currentpath.replace("/", "\\")
-        if self.currentpath:
-            self.textEdit.setText(self.pathwin)
+        nameMovie = self.GetNameMovie.toPlainText()
+        if nameMovie == "":
+            self.noneNameMovie()
+        else:
+            self.currentpath = QFileDialog.getExistingDirectory()
+            self.pathwin = self.currentpath.replace("/", "\\")
+            if self.currentpath:
+                self.textEdit.setText(self.pathwin)
 
     def showTime(self):
         time = QDateTime.currentDateTime()
@@ -310,6 +316,7 @@ class Ui_WizardPage(object):
         if nameMovie == "":
             self.noneNameMovie()
         else:
+            self.checkSubmitButton = True
             self.progressBar(100)
 
     def noneNameMovie(self):
@@ -351,7 +358,7 @@ class Ui_WizardPage(object):
                 os.makedirs(self.path, exist_ok=True)
 
         except OSError as error:
-            print("Directory '%s' can not be created" % getNameMovie.capitalize())
+            print("Directory '%s' can not be created" % self.setNameMovie().capitalize())
 
     def processFindPoster(self):
         getNameMovie = self.setNameMovie()
@@ -427,30 +434,35 @@ class Ui_WizardPage(object):
                 filesToMove.append(self.setNameMovie() + str(i + 1) + ".zip")
 
             for file in filesToMove:
-                source =  self.pathwin + "\\" + file
-                destination = self.path + "\\" + file
-                shutil.move(source, destination)
-
-            for file in filesToMove:
-                with ZipFile(self.path + "\\" + file, 'r') as zip:
+                with ZipFile(self.pathProgram + "\\" + file, 'r') as zip:
                     zip.extractall(self.path)
 
+            return filesToMove
+
+    def removeZip(self, filesToMove):
+        try:
             for file in filesToMove:
-                os.remove(self.path + "\\" + file)
+                os.remove(self.pathProgram + "\\" + file)
+        except Exception as e:
+            print("error"+ e)
 
     def clickStartbtn(self):
+        if not self.checkSubmitButton:
+            pass
 
-        self.createFolder()
-        link = self.processFindsub(self.searchUrl)
-        self.getSub(self.showOs(), link)
+        else:
+            self.createFolder()
+            link = self.processFindsub(self.searchUrl)
+            fileRm = self.getSub(self.showOs(), link)
+            msg = QMessageBox()
+            msg.setWindowTitle("PySubDl")
+            msg.setText("Process finished")
+            msg.setIcon(QMessageBox.Information)
+            msg.setStandardButtons(QMessageBox.Ok)
 
-        msg = QMessageBox()
-        msg.setWindowTitle("PySubDl")
-        msg.setText("Process finished")
-        msg.setIcon(QMessageBox.Information)
-        msg.setStandardButtons(QMessageBox.Ok)
+            e = msg.exec_()
 
-        e = msg.exec_()
+            self.removeZip(fileRm)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
