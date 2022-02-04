@@ -63,6 +63,7 @@ class Ui_WizardPage(object):
     currentpath = ""
     path = ""
     pathwin = ""
+    pathlin = ""
     pathProgram = os.getcwd()
 
     # Define boolean to check press button submit
@@ -374,7 +375,10 @@ class Ui_WizardPage(object):
 
     # Create folder if dont exist
     def createFolder(self):
-        self.path = os.path.join(self.pathwin, self.setNameMovie().capitalize())
+        if self.showOs() == "Windows":
+            self.path = os.path.join(self.pathwin, self.setNameMovie().capitalize())
+        else:
+            self.path = os.path.join(self.currentpath, self.setNameMovie().capitalize())
         try:
             if os.path.exists(self.setNameMovie().capitalize()):
                 msg = QMessageBox()
@@ -478,7 +482,7 @@ class Ui_WizardPage(object):
             for link in linkDownload:
                 system("wget -O "+str(count)+".zip '"+link+"'")
                 system("unzip "+str(count)+".zip && rm "+str(count)+".zip")
-                system("mv *.srt '" + self.currentpath + "'")
+                system("mv *.srt '" + self.path + "'")
                 count += 1
 
     # remove zip just for windows os
