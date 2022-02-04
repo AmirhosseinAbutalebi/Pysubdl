@@ -15,16 +15,19 @@ from PyQt5.QtCore import QTimer,QDateTime, Qt
 from bs4 import BeautifulSoup
 from zipfile import ZipFile
 import time, sys, requests, os, platform
+from os import system
 
-
+# The base url that we use for get subtitle
 webSiteUrl = "https://subf2m.co"
 
+# Define dict to determine language subtitle
 language = {
     "Persian": "farsi_persian",
     "English": "english",
     "Arabic": "arabic"
 }
 
+# Define dict to determine format subtitle
 formatMovie = {
     "WEB-DL": "WEB-DL",
     "WEBRip": "WEBRip",
@@ -43,6 +46,7 @@ formatMovie = {
     "HDCam": "HDCam"
 }
 
+# Define dict for determine resolotion movie
 resolution = {
     "720": "720",
     "480": "480",
@@ -50,18 +54,21 @@ resolution = {
     "2160": "2160"
 }
 
-
-
-
 class Ui_WizardPage(object):
 
+    # Define str for search url
     searchUrl = ""
+
+    # Follow variable define for get path program and current path
     currentpath = ""
     path = ""
-    pathwin =  ""
+    pathwin = ""
     pathProgram = os.getcwd()
+
+    # Define boolean to check press button submit
     checkSubmitButton = False
 
+    # Ui with qt
     def setupUi(self, WizardPage):
         WizardPage.setObjectName("WizardPage")
         WizardPage.resize(520, 441)
@@ -132,6 +139,7 @@ class Ui_WizardPage(object):
 
         self.radioButton480 = QtWidgets.QRadioButton(WizardPage)
         self.radioButton480.setGeometry(QtCore.QRect(40, 300, 61, 20))
+        self.radioButton480.setChecked(True)
         self.radioButton480.setObjectName("radioButton480")
 
         self.radioButton720 = QtWidgets.QRadioButton(WizardPage)
@@ -268,6 +276,7 @@ class Ui_WizardPage(object):
         self.ChangePathbutton.setText(_translate("WizardPage", "Change"))
         self.submitNameMovie.setText(_translate("WizardPage", "Submit"))
 
+    # This def check which one radio button has active
     def setResolotion(self):
         resolotionSelected = ""
         if self.radioButton480.isChecked():
@@ -280,22 +289,26 @@ class Ui_WizardPage(object):
             resolotionSelected = self.radioButton2160.text()
         return resolotionSelected
 
+    # Set format
     def setFormat(self):
         formatSelected = self.comboBoxForFormat.currentText()
         return formatSelected
-
+    # Set language
     def setLanguage(self):
         languageSelected = self.comboBoxForLanguage.currentText()
         return languageSelected
 
+    # Set name movie
     def setNameMovie(self):
         movie = self.GetNameMovie.toPlainText()
         return movie
 
+    # Show os system for example Linux
     def showOs(self):
         osName = platform.system()
         return osName
 
+    # This def define till show dialog and select folder for save subtitle
     def useDialog(self):
         nameMovie = self.GetNameMovie.toPlainText()
         if nameMovie == "":
@@ -306,11 +319,13 @@ class Ui_WizardPage(object):
             if self.currentpath:
                 self.textEdit.setText(self.pathwin)
 
+    # This def show time and date in program
     def showTime(self):
         time = QDateTime.currentDateTime()
         timeDisplay = time.toString('yyyy-MM-dd hh:mm:ss dddd')
         self.labelShowTime.setText(timeDisplay)
 
+    # This def check textbox till get name movie
     def clickSubmitNameMovie(self):
         nameMovie = self.GetNameMovie.toPlainText()
         if nameMovie == "":
@@ -319,14 +334,16 @@ class Ui_WizardPage(object):
             self.checkSubmitButton = True
             self.progressBar(100)
 
+    # if textbox has empty see this Messagebox for error
     def noneNameMovie(self):
         msg = QMessageBox()
         msg.setWindowTitle("PySubDl")
-        msg.setText("The name of Movie is empty please enter the name")
+        msg.setText("The name of Movie is empty please enter the name.")
         msg.setIcon(QMessageBox.Warning)
         msg.setStandardButtons(QMessageBox.Ok)
         e = msg.exec_()
 
+    # show progressbar
     def progressBar(self, maxProgressBar):
         for i in range(maxProgressBar):
             time.sleep(0.02)
@@ -334,17 +351,28 @@ class Ui_WizardPage(object):
             if i == maxProgressBar-5:
                 self.showPoster()
 
+    # Get poster form the site and show on program
     def showPoster(self):
-        posterUrl, self.searchUrl = self.processFindPoster()
-        image = QImage()
-        image.loadFromData(requests.get(posterUrl).content)
+        try:
+            posterUrl, self.searchUrl = self.processFindPoster()
+            image = QImage()
+            image.loadFromData(requests.get(posterUrl).content)
 
-        self.labelShowPoster.setPixmap(QPixmap(image))
-        self.labelShowPoster.show()
+            self.labelShowPoster.setPixmap(QPixmap(image))
+            self.labelShowPoster.show()
+        except:
+            msg = QMessageBox()
+            msg.setWindowTitle("PySubDl")
+            msg.setText("Cant find poster.Please check name movie.")
+            msg.setIcon(QMessageBox.Warning)
+            msg.setStandardButtons(QMessageBox.Ok)
+            e = msg.exec_()
 
+    # For close window
     def closeWindow(self):
         exit(0)
 
+    # Create folder if dont exist
     def createFolder(self):
         self.path = os.path.join(self.pathwin, self.setNameMovie().capitalize())
         try:
@@ -360,63 +388,70 @@ class Ui_WizardPage(object):
         except OSError as error:
             print("Directory '%s' can not be created" % self.setNameMovie().capitalize())
 
+    # This def get url poster and movie
     def processFindPoster(self):
-        getNameMovie = self.setNameMovie()
-        getlanguage = self.setLanguage()
-        getNameMovie = getNameMovie.replace(" ", "+")
-        getNameMovie = getNameMovie.lower()
+        try:
+            getNameMovie = self.setNameMovie()
+            getlanguage = self.setLanguage()
+            getNameMovie = getNameMovie.replace(" ", "+")
+            getNameMovie = getNameMovie.lower()
 
-        searchUrl = webSiteUrl + "/subtitles/searchbytitle?query=" + getNameMovie + "&l="
+            searchUrl = webSiteUrl + "/subtitles/searchbytitle?query=" + getNameMovie + "&l="
 
-        getPage = requests.get(searchUrl)
-        getInfoPage = BeautifulSoup(getPage.content, "html5lib")
-
-        searchName = getInfoPage.find("div", {"class": "title"})
-        nameMovieFound = searchName.get_text()
-
-        nameMovieFound = nameMovieFound.lower()
-        nameCheckMovie = getNameMovie.split()
-
-        for check in nameCheckMovie:
-            if check not in nameMovieFound:
-                msg = QMessageBox()
-                msg.setWindowTitle("PySubDl")
-                msg.setText("Movie not found")
-                msg.setIcon(QMessageBox.Information)
-                msg.setStandardButtons(QMessageBox.Ok)
-                continue
-
-        searchMovieUrl = webSiteUrl + searchName.find("a").get("href") + "/" + language[getlanguage]
-
-        getPage = requests.get(searchMovieUrl)
-        getInfoPage = BeautifulSoup(getPage.content, "html5lib")
-
-        posterUrl = getInfoPage.find("div", {"class": "poster"}).find("img").get("src")
-
-        return posterUrl, searchMovieUrl
-
-    def processFindsub(self,searchMovieUrl):
-        getFormat = self.setFormat()
-        getResolotion = self.setResolotion()
-        getPage = requests.get(searchMovieUrl)
-        getInfoPage = BeautifulSoup(getPage.content, "html5lib")
-        subtitleUrl = []
-        for item in getInfoPage.find_all("li", {"class": "item"}):
-            for list in item.find_all("ul", {"class": "scrolllist"}):
-                if getFormat in list.text and getResolotion in list.text:
-                    subtitleUrl.append(
-                        webSiteUrl + item.find("a", {"class": "download icon-download"}).get("href"))
-
-        linkDownload = []
-        for page in subtitleUrl:
-            getPage = requests.get(page)
+            getPage = requests.get(searchUrl)
             getInfoPage = BeautifulSoup(getPage.content, "html5lib")
-            linkDownload.append(webSiteUrl + getInfoPage.find("a", {"class": "button positive"}).get("href"))
 
-        return linkDownload
+            searchName = getInfoPage.find("div", {"class": "title"})
+            nameMovieFound = searchName.get_text()
 
+            nameMovieFound = nameMovieFound.lower()
+            nameCheckMovie = getNameMovie.split()
 
+            for check in nameCheckMovie:
+                if check not in nameMovieFound:
+                    msg = QMessageBox()
+                    msg.setWindowTitle("PySubDl")
+                    msg.setText("Movie not found")
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setStandardButtons(QMessageBox.Ok)
+                    continue
 
+            searchMovieUrl = webSiteUrl + searchName.find("a").get("href") + "/" + language[getlanguage]
+
+            getPage = requests.get(searchMovieUrl)
+            getInfoPage = BeautifulSoup(getPage.content, "html5lib")
+
+            posterUrl = getInfoPage.find("div", {"class": "poster"}).find("img").get("src")
+
+            return posterUrl, searchMovieUrl
+        except:
+            self.errormsg()
+
+    # This def get link subtitle for download
+    def processFindsub(self,searchMovieUrl):
+        try:
+            getFormat = self.setFormat()
+            getResolotion = self.setResolotion()
+            getPage = requests.get(searchMovieUrl)
+            getInfoPage = BeautifulSoup(getPage.content, "html5lib")
+            subtitleUrl = []
+            for item in getInfoPage.find_all("li", {"class": "item"}):
+                for list in item.find_all("ul", {"class": "scrolllist"}):
+                    if getFormat in list.text and getResolotion in list.text:
+                        subtitleUrl.append(
+                            webSiteUrl + item.find("a", {"class": "download icon-download"}).get("href"))
+
+            linkDownload = []
+            for page in subtitleUrl:
+                getPage = requests.get(page)
+                getInfoPage = BeautifulSoup(getPage.content, "html5lib")
+                linkDownload.append(webSiteUrl + getInfoPage.find("a", {"class": "button positive"}).get("href"))
+
+            return linkDownload
+        except:
+            self.errormsg()
+
+    # Download sub and save and unzip
     def getSub(self, os, linkDownload):
         if os == "Windows":
             count = 1
@@ -438,7 +473,15 @@ class Ui_WizardPage(object):
                     zip.extractall(self.path)
 
             return filesToMove
+        if os == "Linux":
+            count = 1
+            for link in linkDownload:
+                system("wget -O "+str(count)+".zip '"+link+"'")
+                system("unzip "+str(count)+".zip && rm "+str(count)+".zip")
+                system("mv *.srt '" + self.path + "'")
+                count += 1
 
+    # remove zip just for windows os
     def removeZip(self, filesToMove):
         try:
             for file in filesToMove:
@@ -446,9 +489,19 @@ class Ui_WizardPage(object):
         except Exception as e:
             print("error"+ e)
 
+    # error message for dont click submit button and etc
+    def errormsg(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("PySubDl")
+        msg.setText("Cant find movie.Please check name movie and enter the name on textbox and then press submit button.")
+        msg.setIcon(QMessageBox.Warning)
+        msg.setStandardButtons(QMessageBox.Ok)
+        e = msg.exec_()
+
+    # This def start the process then show relative message
     def clickStartbtn(self):
         if not self.checkSubmitButton:
-            pass
+            self.errormsg()
 
         else:
             self.createFolder()
@@ -461,8 +514,8 @@ class Ui_WizardPage(object):
             msg.setStandardButtons(QMessageBox.Ok)
 
             e = msg.exec_()
-
-            self.removeZip(fileRm)
+            if self.showOs() == "Windows":
+                self.removeZip(fileRm)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
