@@ -478,7 +478,7 @@ class Ui_WizardPage(object):
             for link in linkDownload:
                 system("wget -O "+str(count)+".zip '"+link+"'")
                 system("unzip "+str(count)+".zip && rm "+str(count)+".zip")
-                system("mv *.srt '" + self.path + "'")
+                system("mv *.srt '" + self.currentpath + "/"+self.setNameMovie()+ "'")
                 count += 1
 
     # remove zip just for windows os
