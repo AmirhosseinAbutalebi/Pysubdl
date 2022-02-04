@@ -10,6 +10,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
+from PyQt5.QtWinExtras import QWinTaskbarProgress, QWinTaskbarButton
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer,QDateTime, Qt
 from bs4 import BeautifulSoup
@@ -73,6 +74,8 @@ class Ui_WizardPage(object):
     def setupUi(self, WizardPage):
         WizardPage.setObjectName("WizardPage")
         WizardPage.resize(520, 441)
+        icon = QtGui.QIcon('Pysubdl.png')
+        WizardPage.setWindowIcon(icon)
 
         self.StartButton = QtWidgets.QPushButton(WizardPage)
         self.StartButton.setGeometry(QtCore.QRect(270, 400, 90, 30))
@@ -156,11 +159,11 @@ class Ui_WizardPage(object):
         self.radioButton2160.setObjectName("radioButton2160")
 
         self.labelOfOsName = QtWidgets.QLabel(WizardPage)
-        self.labelOfOsName.setGeometry(QtCore.QRect(30, 30, 81, 16))
+        self.labelOfOsName.setGeometry(QtCore.QRect(40, 3, 80, 30))
         self.labelOfOsName.setObjectName("labelOfOsName")
 
         self.labelOsNameShow = QtWidgets.QLabel(WizardPage)
-        self.labelOsNameShow.setGeometry(QtCore.QRect(130, 30, 71, 16))
+        self.labelOsNameShow.setGeometry(QtCore.QRect(130, 3, 70, 30))
         self.labelOsNameShow.setObjectName("labelOsNameShow")
 
         self.progressBarOfPoster = QtWidgets.QProgressBar(WizardPage)
@@ -175,6 +178,20 @@ class Ui_WizardPage(object):
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
+
+        self.line_5 = QtWidgets.QFrame(WizardPage)
+        self.line_5.setGeometry(QtCore.QRect(0, 50, 250, 20))
+        self.line_5.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_5.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_5.setObjectName("line_5")
+
+        self.labelOfDateRealese = QtWidgets.QLabel(WizardPage)
+        self.labelOfDateRealese.setGeometry(QtCore.QRect(40, 70, 90, 30))
+        self.labelOfDateRealese.setObjectName("labelOfDateRealese")
+
+        self.dateRealese = QtWidgets.QTextEdit(WizardPage)
+        self.dateRealese.setGeometry(QtCore.QRect(150, 71, 60, 27))
+        self.dateRealese.setObjectName("dateRealeseText")
 
         self.line_2 = QtWidgets.QFrame(WizardPage)
         self.line_2.setGeometry(QtCore.QRect(0, 250, 251, 20))
@@ -216,7 +233,7 @@ class Ui_WizardPage(object):
         self.labelShowPoster.setObjectName("labelShowPoster")
 
         self.labelShowTime = QtWidgets.QLabel(WizardPage)
-        self.labelShowTime.setGeometry(QtCore.QRect(30, 60, 200, 30))
+        self.labelShowTime.setGeometry(QtCore.QRect(20, 25, 200, 30))
         self.labelShowTime.setAlignment(Qt.AlignCenter)
         self.labelShowTime.setObjectName("labelShowTime")
 
@@ -242,6 +259,7 @@ class Ui_WizardPage(object):
         self.StartButton.setText(_translate("WizardPage", "Start"))
         self.CancelButton.setText(_translate("WizardPage", "Cancel"))
         self.GetNameMovie.setPlaceholderText(_translate("WizardPage", "For Example Deadpool "))
+        self.dateRealese.setPlaceholderText(_translate("WizardPage", "  2016 "))
         self.NameMovie.setText(_translate("WizardPage", "Please Enter Name of movie :"))
         self.labelOfLanguage.setText(_translate("WizardPage", "Select Language Of Subtitle :"))
         self.labelOfFormatMovie.setText(_translate("WizardPage", "Select Format Movie :"))
@@ -273,6 +291,7 @@ class Ui_WizardPage(object):
         self.radioButton2160.setText(_translate("WizardPage", "2160"))
         self.labelOfOsName.setText(_translate("WizardPage", "OS System :"))
         self.labelOsNameShow.setText(_translate("WizardPage", self.showOs()))
+        self.labelOfDateRealese.setText(_translate("WizardPage", "Date Release :"))
         self.labelForPath.setText(_translate("WizardPage", "Path for Download :"))
         self.ChangePathbutton.setText(_translate("WizardPage", "Change"))
         self.submitNameMovie.setText(_translate("WizardPage", "Submit"))
@@ -294,6 +313,12 @@ class Ui_WizardPage(object):
     def setFormat(self):
         formatSelected = self.comboBoxForFormat.currentText()
         return formatSelected
+
+    # Set date
+    def setDate(self):
+        date = self.dateRealese.toPlainText()
+        return date
+
     # Set language
     def setLanguage(self):
         languageSelected = self.comboBoxForLanguage.currentText()
@@ -397,6 +422,7 @@ class Ui_WizardPage(object):
         try:
             getNameMovie = self.setNameMovie()
             getlanguage = self.setLanguage()
+            counter = len(getNameMovie.split())
             getNameMovie = getNameMovie.replace(" ", "+")
             getNameMovie = getNameMovie.lower()
 
@@ -409,7 +435,7 @@ class Ui_WizardPage(object):
             nameMovieFound = searchName.get_text()
 
             nameMovieFound = nameMovieFound.lower()
-            nameCheckMovie = getNameMovie.split()
+            nameCheckMovie = getNameMovie.split("+")
 
             for check in nameCheckMovie:
                 if check not in nameMovieFound:
@@ -418,9 +444,19 @@ class Ui_WizardPage(object):
                     msg.setText("Movie not found")
                     msg.setIcon(QMessageBox.Information)
                     msg.setStandardButtons(QMessageBox.Ok)
-                    continue
+                    exit(0)
 
-            searchMovieUrl = webSiteUrl + searchName.find("a").get("href") + "/" + language[getlanguage]
+            if self.setDate() != "":
+                for item in getInfoPage.find_all("div", {"class": "title"}):
+                    date = item.find("a").get_text().split()
+                    if len(date[counter]) == 6:
+                        date[counter] = date[counter].replace("(", "")
+                        dateRelease = date[counter].replace(")", "")
+                        if dateRelease == self.setDate():
+                            searchMovieUrl = webSiteUrl + item.find("a").get("href") + "/" + language[getlanguage]
+                            break
+            else:
+                searchMovieUrl = webSiteUrl + searchName.find("a").get("href") + "/" + language[getlanguage]
 
             getPage = requests.get(searchMovieUrl)
             getInfoPage = BeautifulSoup(getPage.content, "html5lib")
