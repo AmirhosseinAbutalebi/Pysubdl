@@ -362,7 +362,9 @@ class Ui_WizardPage(object):
 
     # if textbox has empty see this Messagebox for error
     def noneNameMovie(self):
+        icon = QtGui.QIcon('Pysubdl.png')
         msg = QMessageBox()
+        msg.setWindowIcon(icon)
         msg.setWindowTitle("PySubDl")
         msg.setText("The name of Movie is empty please enter the name.")
         msg.setIcon(QMessageBox.Warning)
@@ -387,7 +389,9 @@ class Ui_WizardPage(object):
             self.labelShowPoster.setPixmap(QPixmap(image))
             self.labelShowPoster.show()
         except:
+            icon = QtGui.QIcon('Pysubdl.png')
             msg = QMessageBox()
+            msg.setWindowIcon(icon)
             msg.setWindowTitle("PySubDl")
             msg.setText("Cant find poster.Please check name movie.")
             msg.setIcon(QMessageBox.Warning)
@@ -406,7 +410,9 @@ class Ui_WizardPage(object):
             self.path = os.path.join(self.currentpath, self.setNameMovie().capitalize())
         try:
             if os.path.exists(self.setNameMovie().capitalize()):
+                icon = QtGui.QIcon('Pysubdl.png')
                 msg = QMessageBox()
+                msg.setWindowIcon(icon)
                 msg.setWindowTitle("PySubDl")
                 msg.setText("Folder with name movie has exist.please remove it or change directory.")
                 msg.setIcon(QMessageBox.Information)
@@ -439,7 +445,9 @@ class Ui_WizardPage(object):
 
             for check in nameCheckMovie:
                 if check not in nameMovieFound:
+                    icon = QtGui.QIcon('Pysubdl.png')
                     msg = QMessageBox()
+                    msg.setWindowIcon(icon)
                     msg.setWindowTitle("PySubDl")
                     msg.setText("Movie not found")
                     msg.setIcon(QMessageBox.Information)
@@ -531,7 +539,9 @@ class Ui_WizardPage(object):
 
     # error message for dont click submit button and etc
     def errormsg(self):
+        icon = QtGui.QIcon('Pysubdl.png')
         msg = QMessageBox()
+        msg.setWindowIcon(icon)
         msg.setWindowTitle("PySubDl")
         msg.setText("Cant find movie.Please check name movie and enter the name on textbox and then press submit button.")
         msg.setIcon(QMessageBox.Warning)
@@ -547,7 +557,9 @@ class Ui_WizardPage(object):
             self.createFolder()
             link = self.processFindsub(self.searchUrl)
             fileRm = self.getSub(self.showOs(), link)
+            icon = QtGui.QIcon('Pysubdl.png')
             msg = QMessageBox()
+            msg.setWindowIcon(icon)
             msg.setWindowTitle("PySubDl")
             msg.setText("Process finished")
             msg.setIcon(QMessageBox.Information)
