@@ -338,7 +338,7 @@ class Ui_WizardPage(object):
     def useDialog(self):
         nameMovie = self.GetNameMovie.toPlainText()
         if nameMovie == "":
-            self.noneNameMovie()
+            self.msg("The name of Movie is empty please enter the name.")
         else:
             self.currentpath = QFileDialog.getExistingDirectory()
             self.pathwin = self.currentpath.replace("/", "\\")
@@ -355,21 +355,10 @@ class Ui_WizardPage(object):
     def clickSubmitNameMovie(self):
         nameMovie = self.GetNameMovie.toPlainText()
         if nameMovie == "":
-            self.noneNameMovie()
+            self.msg("The name of Movie is empty please enter the name.")
         else:
             self.checkSubmitButton = True
             self.progressBar(100)
-
-    # if textbox has empty see this Messagebox for error
-    def noneNameMovie(self):
-        icon = QtGui.QIcon('Pysubdl.png')
-        msg = QMessageBox()
-        msg.setWindowIcon(icon)
-        msg.setWindowTitle("PySubDl")
-        msg.setText("The name of Movie is empty please enter the name.")
-        msg.setIcon(QMessageBox.Warning)
-        msg.setStandardButtons(QMessageBox.Ok)
-        e = msg.exec_()
 
     # show progressbar
     def progressBar(self, maxProgressBar):
@@ -389,14 +378,7 @@ class Ui_WizardPage(object):
             self.labelShowPoster.setPixmap(QPixmap(image))
             self.labelShowPoster.show()
         except:
-            icon = QtGui.QIcon('Pysubdl.png')
-            msg = QMessageBox()
-            msg.setWindowIcon(icon)
-            msg.setWindowTitle("PySubDl")
-            msg.setText("Cant find poster.Please check name movie.")
-            msg.setIcon(QMessageBox.Warning)
-            msg.setStandardButtons(QMessageBox.Ok)
-            e = msg.exec_()
+            self.msg("Cant find poster.Please check name movie.")
 
     # For close window
     def closeWindow(self):
@@ -410,13 +392,7 @@ class Ui_WizardPage(object):
             self.path = os.path.join(self.currentpath, self.setNameMovie().capitalize())
         try:
             if os.path.exists(self.setNameMovie().capitalize()):
-                icon = QtGui.QIcon('Pysubdl.png')
-                msg = QMessageBox()
-                msg.setWindowIcon(icon)
-                msg.setWindowTitle("PySubDl")
-                msg.setText("Folder with name movie has exist.please remove it or change directory.")
-                msg.setIcon(QMessageBox.Information)
-                msg.setStandardButtons(QMessageBox.Ok)
+                self.msg("Folder with name movie has exist.please remove it or change directory.")
             else:
                 os.makedirs(self.path, exist_ok=True)
 
@@ -445,13 +421,7 @@ class Ui_WizardPage(object):
 
             for check in nameCheckMovie:
                 if check not in nameMovieFound:
-                    icon = QtGui.QIcon('Pysubdl.png')
-                    msg = QMessageBox()
-                    msg.setWindowIcon(icon)
-                    msg.setWindowTitle("PySubDl")
-                    msg.setText("Movie not found")
-                    msg.setIcon(QMessageBox.Information)
-                    msg.setStandardButtons(QMessageBox.Ok)
+                    self.msg("Movie not found")
                     exit(0)
 
             if self.setDate() != "":
@@ -538,12 +508,13 @@ class Ui_WizardPage(object):
             print("error"+ e)
 
     # error message for dont click submit button and etc
-    def errormsg(self):
+    def msg(self, message):
         icon = QtGui.QIcon('Pysubdl.png')
         msg = QMessageBox()
         msg.setWindowIcon(icon)
         msg.setWindowTitle("PySubDl")
-        msg.setText("Cant find movie.Please check name movie and enter the name on textbox and then press submit button.")
+        #msg.setText("Cant find movie.Please check name movie and enter the name on textbox and then press submit button.")
+        msg.setText(message)
         msg.setIcon(QMessageBox.Warning)
         msg.setStandardButtons(QMessageBox.Ok)
         e = msg.exec_()
@@ -551,21 +522,14 @@ class Ui_WizardPage(object):
     # This def start the process then show relative message
     def clickStartbtn(self):
         if not self.checkSubmitButton:
-            self.errormsg()
+            self.msg("Cant find movie.Please check name movie and enter the name on textbox and then press submit button.")
 
         else:
             self.createFolder()
             link = self.processFindsub(self.searchUrl)
             fileRm = self.getSub(self.showOs(), link)
-            icon = QtGui.QIcon('Pysubdl.png')
-            msg = QMessageBox()
-            msg.setWindowIcon(icon)
-            msg.setWindowTitle("PySubDl")
-            msg.setText("Process finished")
-            msg.setIcon(QMessageBox.Information)
-            msg.setStandardButtons(QMessageBox.Ok)
+            self.msg("Process finished")
 
-            e = msg.exec_()
             if self.showOs() == "Windows":
                 self.removeZip(fileRm)
 
