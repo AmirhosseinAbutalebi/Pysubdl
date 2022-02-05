@@ -513,7 +513,6 @@ class Ui_WizardPage(object):
         msg = QMessageBox()
         msg.setWindowIcon(icon)
         msg.setWindowTitle("PySubDl")
-        #msg.setText("Cant find movie.Please check name movie and enter the name on textbox and then press submit button.")
         msg.setText(message)
         msg.setIcon(QMessageBox.Warning)
         msg.setStandardButtons(QMessageBox.Ok)
