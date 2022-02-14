@@ -12,7 +12,7 @@ now need till install requirement library that use this program with follow comm
 `pip install html5lib`</br>
 third :now go to FinalProgram folder and open cmd or terminal and use this command :</br>
 `python Qtpysubdl.py`</br>
-enjoy:).
+enjoy :) .
 # Screenshot
 ![alt text](https://github.com/AmirhosseinAbutalebi/Pysubdl/blob/master/FinalProgram/ScreenShot-1.png)
 ![alt text](https://github.com/AmirhosseinAbutalebi/Pysubdl/blob/master/FinalProgram/ScreenShot-2.png)
