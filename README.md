@@ -9,13 +9,10 @@ Screenshot from program
 first :download this repository and extract on your pc.</br>
 second :need to install requirement library that used in the program and python.</br>
 go to python site and install python3(`https://www.python.org/downloads`)</br>
-now need till install pyqt5 with follow command in terminal or cmd</br>
+now need till install requirement library that use this program with follow commands in terminal or cmd</br>
 `pip install PyQt5`</br>
-then need install beautifulsoup with this command  in terminal or cmd</br>
 `pip install bs4`</br>
-then need install requests with this command  in terminal or cmd</br>
 `pip install requests`</br>
-then need install html5 with this command  in terminal or cmd</br>
 `pip install html5lib`</br>
 third :now go to FinalProgram folder and open cmd or terminal and use this command</br>
 `python Qtpysubdl.py`</br>
