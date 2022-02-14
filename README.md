@@ -1,6 +1,6 @@
 # pysubdl
 python subtitle downloder.start webscrape with python and ui design with pyqt5.</br>
-pysubdl can run in linux and windows and maybe have bug and pls help me till fix all bug.</br>
+pysubdl can run in linux and windows and maybe have bug and please help me till fix all bug.</br>
 # How to install and Use
 first : download this repository and extract on your pc.</br></br>
 second : need to install requirement library that used in the program and python.</br>
