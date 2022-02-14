@@ -1,3 +1,4 @@
+> Version 1.0
 # pysubdl
 python subtitle downloder.start webscrape with python and ui design with pyqt5.</br>
 pysubdl can run in linux and windows and maybe have bug and please help me till fix all bug.</br>
